@@ -34,17 +34,13 @@ class MainController
     if ($req->isPost()) {
       $post = new Post();
 
-      $post->loadData($req->body());
+      $result = $post->create($req->body());
 
-      if ($post->validate()) {
-        die('error');
-      }
-      if ($post->save()) {
-        die('success');
+      if (!empty($result['errors'])) {
+        return $res->render("create-product", $result);
       }
 
-      // $res = $post->save();
-      exit;
+      echo 'Create successfully';
     }
     $res->render("create-product");
     // echo "Single Posts";

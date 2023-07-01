@@ -18,9 +18,9 @@ namespace app\database;
 class Database
 {
   public static string $DB_HOST;
+  public static string $DB_NAME;
   public static string $DB_USER;
   public static string $DB_PASSWORD;
-  public static string $DB_NAME;
 
 
   public static \PDO $pdo;
@@ -32,7 +32,7 @@ class Database
     $username = $dbConfig['user'] ?? self::$DB_USER;
     $password = $dbConfig['password'] ?? self::$DB_PASSWORD;;
 
-    $dns = 'mysql:host=' . self::$DB_HOST . ';dbname=' . self::$DB_NAME;
+    $dns = 'mysql:host=' . $host . ';dbname=' . $name;
 
     self::$pdo = new \PDO($dns, $username, $password);
     self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);

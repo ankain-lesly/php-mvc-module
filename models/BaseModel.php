@@ -116,7 +116,7 @@ class BaseModel
     ];
   }
 
-  public function errorMessage($rule)
+  public function getErrorMessage($rule)
   {
     return $this->errorMessages()[$rule];
   }
@@ -124,7 +124,7 @@ class BaseModel
   protected function addErrorByRule(string $attribute, string $rule, $params = [])
   {
     $params['field'] ??= $attribute;
-    $errorMessage = $this->errorMessage($rule);
+    $errorMessage = $this->getErrorMessage($rule);
     foreach ($params as $key => $value) {
       $errorMessage = str_replace("{{$key}}", $value, $errorMessage);
     }
@@ -141,6 +141,10 @@ class BaseModel
     return $this->errors[$attribute] ?? false;
   }
 
+  public function getErrors()
+  {
+    return $this->errors;
+  }
   public function getFirstError($attribute)
   {
     $errors = $this->errors[$attribute] ?? [];

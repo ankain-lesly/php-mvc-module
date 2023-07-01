@@ -2,9 +2,9 @@
 
 namespace app\models;
 
-use app\database\DbModel;
+use app\database\DBModel;
 
-class Post extends DbModel
+class Post extends DBModel
 {
     public int $id = 0;
     public string $title = '';
@@ -30,10 +30,10 @@ class Post extends DbModel
         ];
     }
 
-    public function save()
+    public function create(array $form_data)
     {
-        // $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-        return parent::save();
+        // return parent::save($form_data);
+        return $this->save($form_data);
     }
 
     // public function getDisplayName(): string

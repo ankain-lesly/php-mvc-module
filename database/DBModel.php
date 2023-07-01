@@ -27,15 +27,21 @@ abstract class DBModel extends BaseModel
     Database::$DB_HOST = $DB_CONFIG['host'] ?? die('Database configurations "host" is required');
     Database::$DB_USER = $DB_CONFIG['user'] ?? die('Database configurations "user" is required');
     Database::$DB_PASSWORD = $DB_CONFIG['password'] ?? die('Database configurations "password" is required');
-    Database::$DB_PASSWORD = $DB_CONFIG['name'] ?? die('Database configurations "name" is required');
+    Database::$DB_NAME = $DB_CONFIG['name'] ?? die('Database configurations "name" is required');
   }
   public static function primaryKey(): string
   {
     return 'id';
   }
 
-  public function save()
+  public function save(array $data)
   {
+    $this->loadData($data);
+
+    if (!$this->validate()) {
+      return ["errors" => $this->getErrors()];
+    }
+
     $tableName = $this->tableName();
     $attributes = $this->attributes();
 

@@ -10,6 +10,7 @@ use app\router\Router;
 
 $router = new Router(__DIR__);
 
+// Database Configurations
 $DB_Config = [
   'host' => 'localhost',
   'user' => 'root',
