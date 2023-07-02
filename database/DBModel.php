@@ -87,53 +87,70 @@ abstract class DBModel extends BaseModel
   }
 
 
-  public function findOne($where)
+  public function findOne($where, $select_array = null)
   {
+    /**
+     * $select_array
+     * ['id', 'title', 'post_boby', 'created_at']
+     */
+
+    $select_list = " * ";
+    if ($select_array && is_array($select_array)) {
+      $select_list = implode(", ", $select_array);
+    }
+
     $tableName = static::tableName();
     $attributes = array_keys($where);
-    echo '<pre>';
-    print_r(($attributes));
-    print_r(array_map(fn ($attr) => ":$attr", $attributes));
-    echo '<br />';
-    echo '</pre>';
-    exit;
-    echo $sql = implode(" AND ", array_map(fn ($attr) => "$attr = :$attr", $attributes));
 
-    exit;
-    // $statement = self::prepare("SELECT * FROM $tableName WHERE $sql");
+    $sql_where = implode(" AND ", array_map(fn ($attr) => "$attr = :$attr", $attributes));
+    $sql = "SELECT $select_list FROM $tableName WHERE $sql_where";
 
-    $statement = $this->PDO->prepare("SELECT * FROM $tableName WHERE $sql");
+    $statement = $this->PDO->prepare($sql);
     foreach ($where as $key => $item) {
       $statement->bindValue(":$key", $item);
     }
+
     $statement->execute();
+    // $data = $statement->fetchObject(static::class);
     return $statement->fetchObject(static::class);
   }
 
-  // Fetch Custom Data
-  // public function findOne(array $params)
-  // {
-  //   $stmt = $this->PDO->prepare($query);
-  //   $stmt->execute($params);
-
-  //   // $this->conn = null;
-  //   if ($stmt->rowCount() > 0) {
-  //     return $stmt->fetch(PDO::FETCH_ASSOC);
-  //   }
-  //   return false;
-  // }
-
   // Fetch Custom Data Array
-  public function findAll(string $query, array $params)
+  public function
+  findAll($where, $select_array = null)
   {
-    $stmt = $this->PDO->prepare($query);
-    $stmt->execute($params);
+    /**
+     * $select_array
+     * ['id', 'title', 'post_boby', 'created_at']
+     */
 
-    // $this->conn = null;
+    $select_list = " * ";
+    if ($select_array && is_array($select_array)) {
+      $select_list = implode(
+        ", ",
+        $select_array
+      );
+    }
+
+    $tableName = static::tableName();
+    $attributes = array_keys($where);
+
+    $sql_where = implode(
+      " AND ",
+      array_map(fn ($attr) => "$attr = :$attr", $attributes)
+    );
+    $sql = "SELECT $select_list FROM $tableName WHERE $sql_where";
+
+    $statement = $this->PDO->prepare($sql);
+    foreach ($where as $key => $item) {
+      $statement->bindValue(":$key", $item);
+    }
+
+    $statement->execute();
     $data = array();
 
-    if ($stmt->rowCount() > 0) {
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    if ($statement->rowCount() > 0) {
+      while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
         $data[] = $row;
       }
       return $data;

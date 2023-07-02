@@ -17,8 +17,8 @@ class MainController
   {
     $postObj = new Post();
 
-    $data = ['id' => 1, 'category' => 'AI', "title" => "Hellow"];
-    $posts = $postObj->findOne($data);
+    $where = ['id' => 1];
+    $posts = $postObj->findAll($where);
 
     echo '<pre>';
     print_r($posts);
