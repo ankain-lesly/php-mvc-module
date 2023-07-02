@@ -15,6 +15,16 @@ class MainController
   }
   public function index(Request $req, Response $res)
   {
+    $postObj = new Post();
+
+    $data = ['id' => 1, 'category' => 'AI', "title" => "Hellow"];
+    $posts = $postObj->findOne($data);
+
+    echo '<pre>';
+    print_r($posts);
+    echo '<br />';
+    echo '</pre>';
+    exit;
     $res->render("home");
   }
 
@@ -34,7 +44,7 @@ class MainController
     if ($req->isPost()) {
       $post = new Post();
 
-      $result = $post->create($req->body());
+      $result = $post->save($req->body());
 
       if (!empty($result['errors'])) {
         return $res->render("create-product", $result);

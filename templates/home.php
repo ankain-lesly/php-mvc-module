@@ -10,7 +10,6 @@
   }
 </style>
 
-
 <div class="row">
   <div class="col-sm-3">
     <a href="_/blog/efasdf56561" class="well">

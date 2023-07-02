@@ -23,7 +23,7 @@ class Database
   public static string $DB_PASSWORD;
 
 
-  public static \PDO $pdo;
+  public static \PDO $PDO;
 
   public function __construct($dbConfig = [])
   {
@@ -34,12 +34,13 @@ class Database
 
     $dns = 'mysql:host=' . $host . ';dbname=' . $name;
 
-    self::$pdo = new \PDO($dns, $username, $password);
-    self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+    $pdo = new \PDO($dns, $username, $password);
+    self::$PDO = $pdo;
+    self::$PDO->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
   }
 
-  public static function prepare($sql): \PDOStatement
+  public function connect(): \PDO
   {
-    return self::$pdo->prepare($sql);
+    return self::$PDO;
   }
 }

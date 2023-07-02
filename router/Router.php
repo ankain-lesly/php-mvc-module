@@ -112,7 +112,10 @@ class Router
     $callback = $this->routes[$method][$path] ?? false;
     // try {
     //Undefined Page Handler
+
     if ($callback === false) {
+
+      if ($path !== "/404") return $this->interceptRequest("_/404");
 
       if (self::$NOT_FOUND) {
         $response
@@ -141,10 +144,10 @@ class Router
     call_user_func($callback, $this->request, $response);
   }
 
-  public function interceptRequest()
+  public function interceptRequest($path = null)
   {
     $server_root = $_SERVER['DOCUMENT_ROOT'];
-    $uri = $this->request->path();
+    $uri = $path ?? $this->request->path();
 
     if (!str_contains($uri, '_/')) return;
 

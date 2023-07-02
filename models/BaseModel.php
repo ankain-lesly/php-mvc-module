@@ -8,6 +8,7 @@
 
 namespace app\models;
 
+use app\database\DataAccess;
 use app\database\Database;
 
 /**
@@ -26,11 +27,19 @@ class BaseModel
   const RULE_UNIQUE = 'unique';
 
   public array $errors = [];
-  public Database $Database;
+  public \PDO $PDO;
+  public DataAccess $DataAccess;
 
   public function __construct()
   {
-    $this->Database = new Database();
+    $DB = new Database();
+    $this->PDO = $DB->connect();
+
+    $this->DataAccess = new DataAccess($this->PDO);
+    /**
+     * Database
+     * connect method
+     */
   }
 
   public function loadData($data)
@@ -90,7 +99,7 @@ class BaseModel
           $className = $rule['class'];
           $uniqueAttr = $rule['attribute'] ?? $attribute;
           $tableName = $className::tableName();
-          $db = $this->Database;
+          $db = $this->PDO;
           $statement = $db->prepare("SELECT * FROM $tableName WHERE $uniqueAttr = :$uniqueAttr");
           $statement->bindValue(":$uniqueAttr", $value);
           $statement->execute();

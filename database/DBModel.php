@@ -10,6 +10,7 @@ namespace app\database;
 
 use app\database\Database;
 use app\models\BaseModel;
+use PDO;
 
 /**
  * Class DBModel
@@ -50,7 +51,8 @@ abstract class DBModel extends BaseModel
     $sql = "INSERT INTO $tableName (" . implode(",", $attributes) . ") 
                 VALUES (" . implode(",", $params) . ")";
 
-    $statement = Database::prepare($sql);
+    // $statement = $this->PDO->prepare($sql);
+    $statement = $this->PDO->prepare($sql);
 
     foreach ($attributes as $attribute) {
       $statement->bindValue(":$attribute", $this->{$attribute});
@@ -59,24 +61,114 @@ abstract class DBModel extends BaseModel
     return $statement->execute();
   }
 
-  // public static function prepare($sql): \PDOStatement
+  // public static function prepare($sql): PDOStatement
   // {
-  //   return Database::prepare($sql);
+  //   return $this->PDO->prepare($sql);
   // }
 
-  public static function findOne($where)
+  // Query the Database
+  public function insert(string $query, array $params)
+  {
+    $stmt = $this->PDO->prepare($query);
+    $stmt->execute($params);
+
+    $id = $this->PDO->lastInsertId();
+    // $this->conn = null;
+    return $id;
+  }
+
+  // Query Data
+  public function query(string $query, array $params)
+  {
+    $stmt = $this->PDO->prepare($query);
+    $stmt->execute($params);
+
+    return $stmt->rowCount();
+  }
+
+
+  public function findOne($where)
   {
     $tableName = static::tableName();
     $attributes = array_keys($where);
-    $sql = implode("AND", array_map(fn ($attr) => "$attr = :$attr", $attributes));
+    echo '<pre>';
+    print_r(($attributes));
+    print_r(array_map(fn ($attr) => ":$attr", $attributes));
+    echo '<br />';
+    echo '</pre>';
+    exit;
+    echo $sql = implode(" AND ", array_map(fn ($attr) => "$attr = :$attr", $attributes));
 
+    exit;
     // $statement = self::prepare("SELECT * FROM $tableName WHERE $sql");
 
-    $statement = Database::prepare("SELECT * FROM $tableName WHERE $sql");
+    $statement = $this->PDO->prepare("SELECT * FROM $tableName WHERE $sql");
     foreach ($where as $key => $item) {
       $statement->bindValue(":$key", $item);
     }
     $statement->execute();
     return $statement->fetchObject(static::class);
+  }
+
+  // Fetch Custom Data
+  // public function findOne(array $params)
+  // {
+  //   $stmt = $this->PDO->prepare($query);
+  //   $stmt->execute($params);
+
+  //   // $this->conn = null;
+  //   if ($stmt->rowCount() > 0) {
+  //     return $stmt->fetch(PDO::FETCH_ASSOC);
+  //   }
+  //   return false;
+  // }
+
+  // Fetch Custom Data Array
+  public function findAll(string $query, array $params)
+  {
+    $stmt = $this->PDO->prepare($query);
+    $stmt->execute($params);
+
+    // $this->conn = null;
+    $data = array();
+
+    if ($stmt->rowCount() > 0) {
+      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $data[] = $row;
+      }
+      return $data;
+    }
+
+    return false;
+  }
+  // Fetch All Custom Data Array
+  public function fetch(string $query)
+  {
+    $stmt = $this->PDO->query($query);
+
+    // $this->conn = null;
+    $data = array();
+
+    if ($stmt->rowCount() > 0) {
+      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $data[] = $row;
+      }
+      return $data;
+    }
+
+    return false;
+  }
+
+  // Fetch All Custom Data Array
+  public function fetchCount(string $table = null, string $query = '')
+  {
+    if ($query)
+      $stmt = $this->PDO->query($query);
+    else {
+      $sql = "SELECT COUNT(*) AS count FROM $table";
+      $stmt = $this->PDO->query($sql);
+    }
+
+    return $stmt->fetch();
   }
 }
