@@ -201,11 +201,13 @@ abstract class DBModel extends BaseModel
       $data['data'][] = $row;
     }
 
+    $total_rows = $this->findCount()['count'];
     $data['paginate_info'] = $paginate = [
-      "current_page" => $paginate['current_page'] ?? 0,
+      "current_page" => $paginate['current_page'] ?? 1,
+      "total_page" => round($total_rows / ($paginate['page_limit'] ?? 1)),
       "page_limit" => $paginate['page_limit'] ?? 0,
       "order_by" => $paginate['order_by'] ?? '',
-      "total_rows" => $this->findCount()['count'],
+      "total_rows" => $total_rows,
     ];
 
     return $data;
