@@ -153,18 +153,16 @@ abstract class DBModel extends BaseModel
   {
     $paginate = [
       "current_page" => 2,
-      "limit" => 3,
+      "page_limit" => 3,
       "order_by" => "id",
-      //"total_pages" => ,
     ];
 
     $paginate_sql = '';
     $order_sql = '';
 
     if (!empty($paginate)) {
-      echo $start_at = ($paginate['current_page'] - 1) * $paginate['limit'];
-      echo '<br />';
-      $paginate_sql = "LIMIT " . ($start_at) . ", " . $paginate['limit'];
+      $start_at = ($paginate['current_page'] - 1) * $paginate['page_limit'];
+      $paginate_sql = "LIMIT " . ($start_at) . ", " . $paginate['page_limit'];
       $order_sql = !empty($paginate['order_by']) ? "ORDER BY " . $paginate['order_by'] . " DESC" : '';
     }
 
@@ -186,7 +184,7 @@ abstract class DBModel extends BaseModel
 
     $sql_where = $sql_where ? "WHERE $sql_where" : '';
 
-    echo $sql = "SELECT $select_list FROM $tableName $sql_where $order_sql $paginate_sql";
+    $sql = "SELECT $select_list FROM $tableName $sql_where $order_sql $paginate_sql";
 
     $statement = $this->PDO->prepare($sql);
     foreach ($where as $key => $item) {
@@ -203,10 +201,13 @@ abstract class DBModel extends BaseModel
       $data['data'][] = $row;
     }
 
-    echo "<pre>";
-    print_r($data);
-    echo "</pre>";
-    // exit;
+    $data['paginate_info'] = $paginate = [
+      "current_page" => $paginate['current_page'] ?? 0,
+      "page_limit" => $paginate['page_limit'] ?? 0,
+      "order_by" => $paginate['order_by'] ?? '',
+      "total_rows" => $this->findCount()['count'],
+    ];
+
     return $data;
   }
   // Fetch Custom Query
