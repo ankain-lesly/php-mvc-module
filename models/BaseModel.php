@@ -71,9 +71,14 @@ class BaseModel
     return [];
   }
 
-  public function validate()
+  public function validate(array $update_data = [])
   {
+    $update_attrs = array_keys($update_data);
+
     foreach ($this->rules() as $attribute => $rules) {
+
+      if ($update_attrs && !in_array($attribute, $update_attrs)) continue;
+
       $value = $this->{$attribute};
       foreach ($rules as $rule) {
         $ruleName = $rule;
@@ -145,18 +150,18 @@ class BaseModel
     $this->errors[$attribute][] = $message;
   }
 
-  public function hasError($attribute)
-  {
-    return $this->errors[$attribute] ?? false;
-  }
+  // public function hasError($attribute)
+  // {
+  //   return $this->errors[$attribute] ?? false;
+  // }
 
   public function getErrors()
   {
     return $this->errors;
   }
-  public function getFirstError($attribute)
-  {
-    $errors = $this->errors[$attribute] ?? [];
-    return $errors[0] ?? '';
-  }
+  // public function getFirstError($attribute)
+  // {
+  //   $errors = $this->errors[$attribute] ?? [];
+  //   return $errors[0] ?? '';
+  // }
 }

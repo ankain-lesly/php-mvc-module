@@ -17,15 +17,17 @@ class MainController
   {
     $postObj = new Post();
 
-    $where = ['id' => 1];
-    $posts = $postObj->findAll($where);
+    $where = ['id' => 2];
+    $posts = $postObj->findAll();
+    // $DataAccess = (new Post())->DataAccess;
+    // $posts = $DataAccess->findAll("SELECT * FROM posts");
 
-    echo '<pre>';
-    print_r($posts);
-    echo '<br />';
-    echo '</pre>';
-    exit;
-    $res->render("home");
+    // echo '<pre>';
+    // var_dump($posts);
+    // echo '<br />';
+    // echo '</pre>';
+    // exit;
+    $res->render("home", ['posts' => $posts]);
   }
 
   public function contact(Request $req, Response $res)
@@ -44,13 +46,29 @@ class MainController
     if ($req->isPost()) {
       $post = new Post();
 
-      $result = $post->save($req->body());
 
-      if (!empty($result['errors'])) {
+      // $data = array(
+      //   'title' => 'Title updated', 
+      //   'category' => "Category updated",
+      //   'body' => "Body updated",
+      //   'id' => '3',
+      // );
+
+
+      $result = $post->save($req->body());
+      // $result = $post->update($data, ['id']);
+
+      // echo "<pre>";
+      // var_dump($result);
+      // echo "</pre>";
+
+      if (!empty($post->getErrors())) {
         return $res->render("create-product", $result);
       }
 
+      // Redirect to another page
       echo 'Create successfully';
+      // return $res->render("create-product", $result);
     }
     $res->render("create-product");
     // echo "Single Posts";

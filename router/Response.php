@@ -66,8 +66,9 @@ class Response
 
     exit($view);
   }
-  public function json(array $data)
+  public function json(array $data, int $code = 200)
   {
+    $this->status($code);
     exit(json_encode($data));
   }
 

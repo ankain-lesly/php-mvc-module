@@ -30,12 +30,14 @@ abstract class DBModel extends BaseModel
     Database::$DB_PASSWORD = $DB_CONFIG['password'] ?? die('Database configurations "password" is required');
     Database::$DB_NAME = $DB_CONFIG['name'] ?? die('Database configurations "name" is required');
   }
-  public static function primaryKey(): string
-  {
-    return 'id';
-  }
 
-  public function save(array $data)
+  // public static function primaryKey(): string
+  // {
+  //   return 'id';
+  // }
+
+  // Insert Data
+  public function insert(array $data)
   {
     $this->loadData($data);
 
@@ -51,42 +53,72 @@ abstract class DBModel extends BaseModel
     $sql = "INSERT INTO $tableName (" . implode(",", $attributes) . ") 
                 VALUES (" . implode(",", $params) . ")";
 
-    // $statement = $this->PDO->prepare($sql);
     $statement = $this->PDO->prepare($sql);
 
     foreach ($attributes as $attribute) {
       $statement->bindValue(":$attribute", $this->{$attribute});
     }
 
-    return $statement->execute();
+    return $statement->execute() ? $data : false;
   }
 
-  // public static function prepare($sql): PDOStatement
-  // {
-  //   return $this->PDO->prepare($sql);
-  // }
-
-  // Query the Database
-  public function insert(string $query, array $params)
+  // Update Data
+  public function update(array $data, array $where)
   {
-    $stmt = $this->PDO->prepare($query);
-    $stmt->execute($params);
+    $this->loadData($data);
 
-    $id = $this->PDO->lastInsertId();
-    // $this->conn = null;
-    return $id;
+    if (!$this->validate($data)) {
+      return ["errors" => $this->getErrors()];
+    }
+
+    $tableName = $this->tableName();
+
+    $where_params = array();
+
+    foreach ($where as $key) {
+      if (array_key_exists($key, $data)) {
+        $where_params[$key] = $data[$key];
+        unset($data[$key]);
+      }
+    }
+
+    $attributes = array_keys($data);
+
+    $where_sql = array_map(fn ($attr) => "$attr = :$attr", $where);
+
+    $params = array_map(fn ($attr) => "$attr = :$attr", $attributes);
+
+    $sql = "UPDATE $tableName SET " . implode(",", $params) . "
+            WHERE " . implode(" AND ", $where_sql);
+
+    $statement = $this->PDO->prepare($sql);
+    $final_attributes = array_merge($attributes, $where);
+
+    foreach ($final_attributes as $attribute) {
+      $statement->bindValue(":$attribute", $this->{$attribute});
+    }
+    return $statement->execute() ? $data : false;
   }
-
-  // Query Data
-  public function query(string $query, array $params)
+  // Delete Data
+  public function delete($where)
   {
-    $stmt = $this->PDO->prepare($query);
-    $stmt->execute($params);
 
-    return $stmt->rowCount();
+    $tableName = static::tableName();
+    $attributes = array_keys($where);
+
+    $sql_where = implode(" AND ", array_map(fn ($attr) => "$attr = :$attr", $attributes));
+    $sql = "DELETE FROM $tableName WHERE $sql_where";
+
+    $statement = $this->PDO->prepare($sql);
+    foreach ($where as $key => $item) {
+      $statement->bindValue(":$key", $item);
+    }
+
+    $statement->execute();
+    return $statement->rowCount();
   }
 
-
+  // Find Single Object 
   public function findOne($where, $select_array = null)
   {
     /**
@@ -112,17 +144,29 @@ abstract class DBModel extends BaseModel
 
     $statement->execute();
     // $data = $statement->fetchObject(static::class);
-    return $statement->fetchObject(static::class);
+    // return $statement->fetchObject(static::class);
+    return $statement->fetch(PDO::FETCH_ASSOC);
   }
 
-  // Fetch Custom Data Array
-  public function
-  findAll($where, $select_array = null)
+  // Find a Collection of objects
+  public function findAll($where = [], $select_array = null, array $paginate = [])
   {
-    /**
-     * $select_array
-     * ['id', 'title', 'post_boby', 'created_at']
-     */
+    $paginate = [
+      "current_page" => 2,
+      "limit" => 3,
+      "order_by" => "id",
+      //"total_pages" => ,
+    ];
+
+    $paginate_sql = '';
+    $order_sql = '';
+
+    if (!empty($paginate)) {
+      echo $start_at = ($paginate['current_page'] - 1) * $paginate['limit'];
+      echo '<br />';
+      $paginate_sql = "LIMIT " . ($start_at) . ", " . $paginate['limit'];
+      $order_sql = !empty($paginate['order_by']) ? "ORDER BY " . $paginate['order_by'] . " DESC" : '';
+    }
 
     $select_list = " * ";
     if ($select_array && is_array($select_array)) {
@@ -139,7 +183,10 @@ abstract class DBModel extends BaseModel
       " AND ",
       array_map(fn ($attr) => "$attr = :$attr", $attributes)
     );
-    $sql = "SELECT $select_list FROM $tableName WHERE $sql_where";
+
+    $sql_where = $sql_where ? "WHERE $sql_where" : '';
+
+    echo $sql = "SELECT $select_list FROM $tableName $sql_where $order_sql $paginate_sql";
 
     $statement = $this->PDO->prepare($sql);
     foreach ($where as $key => $item) {
@@ -147,45 +194,45 @@ abstract class DBModel extends BaseModel
     }
 
     $statement->execute();
+
+    // if ($statement->rowCount() <= 0) return [];
+
     $data = array();
 
-    if ($statement->rowCount() > 0) {
-      while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $row;
-      }
-      return $data;
+    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+      $data['data'][] = $row;
     }
 
-    return false;
+    echo "<pre>";
+    print_r($data);
+    echo "</pre>";
+    exit;
+    return $data;
   }
-  // Fetch All Custom Data Array
-  public function fetch(string $query)
+  // Fetch Custom Query
+  # ---
+  // Fetch Data count
+  public function findCount(string $table = null, array $where = [])
   {
-    $stmt = $this->PDO->query($query);
+    $tableName = $tableName ?? static::tableName();
 
-    // $this->conn = null;
-    $data = array();
+    $attributes = array_keys($where);
 
-    if ($stmt->rowCount() > 0) {
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $row;
-      }
-      return $data;
+    $sql_where = implode(
+      " AND ",
+      array_map(fn ($attr) => "$attr = :$attr", $attributes)
+    );
+
+    $sql_where = $sql_where ? "WHERE $sql_where" : '';
+
+    $sql = "SELECT COUNT(*) AS count FROM $tableName $sql_where";
+
+    $statement = $this->PDO->prepare($sql);
+    foreach ($where as $key => $item) {
+      $statement->bindValue(":$key", $item);
     }
 
-    return false;
-  }
-
-  // Fetch All Custom Data Array
-  public function fetchCount(string $table = null, string $query = '')
-  {
-    if ($query)
-      $stmt = $this->PDO->query($query);
-    else {
-      $sql = "SELECT COUNT(*) AS count FROM $table";
-      $stmt = $this->PDO->query($sql);
-    }
-
-    return $stmt->fetch();
+    $statement->execute();
+    return $statement->fetch(PDO::FETCH_ASSOC);
   }
 }

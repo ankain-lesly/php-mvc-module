@@ -161,6 +161,8 @@ class Router
 
     $this->response->redirect($redirectTo, 200);
   }
+
+  // Get Response
   public function getResponse()
   {
     return $this->response;

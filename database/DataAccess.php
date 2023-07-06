@@ -26,7 +26,7 @@ class DataAccess
   }
 
   // Query Data
-  public function query(string $query, array $params)
+  public function query(string $query, array $params = [])
   {
     $stmt = $this->PDO->prepare($query);
     $stmt->execute($params);
@@ -34,8 +34,8 @@ class DataAccess
     return $stmt->rowCount();
   }
 
-  // Fetch Custom Data
-  public function findOne(string $query, array $params)
+  // Find Single Object 
+  public function findOne(string $query, array $params = [])
   {
     $stmt = $this->PDO->prepare($query);
     $stmt->execute($params);
@@ -48,51 +48,54 @@ class DataAccess
   }
 
   // Fetch Custom Data Array
-  public function findAll(string $query, array $params)
+  public function findAll(string $query, array $params = [])
   {
     $stmt = $this->PDO->prepare($query);
     $stmt->execute($params);
 
-    // $this->conn = null;
+    if ($stmt->rowCount() <= 0) return false;
+
     $data = array();
-
-    if ($stmt->rowCount() > 0) {
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $row;
-      }
-      return $data;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $data[] = $row;
     }
-
-    return false;
+    return $data;
   }
-  // Fetch All Custom Data Array
+  // Fetch Custom Query
   public function fetch(string $query)
   {
     $stmt = $this->PDO->query($query);
 
-    // $this->conn = null;
+
+    if ($stmt->rowCount() <= 0) return false;
+
     $data = array();
-
-    if ($stmt->rowCount() > 0) {
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $row;
-      }
-      return $data;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $data[] = $row;
     }
-
-    return false;
+    return $data;
   }
 
-  // Fetch All Custom Data Array
-  public function fetchCount(string $table = null, string $query = '')
+  // Fetch Data count
+  public function findCount(string $table_name, array $where = [])
   {
-    if ($query)
-      $stmt = $this->PDO->query($query);
-    else {
-      $sql = "SELECT COUNT(*) AS count FROM $table";
-      $stmt = $this->PDO->query($sql);
+    $attributes = array_keys($where);
+
+    $sql_where = implode(
+      " AND ",
+      array_map(fn ($attr) => "$attr = :$attr", $attributes)
+    );
+
+    $sql_where = $sql_where ? "WHERE $sql_where" : '';
+
+    $sql = "SELECT COUNT(*) AS count FROM $table_name $sql_where";
+
+    $statement = $this->PDO->prepare($sql);
+    foreach ($where as $key => $item) {
+      $statement->bindValue(":$key", $item);
     }
 
-    return $stmt->fetch();
+    $statement->execute();
+    return $statement->fetch(PDO::FETCH_ASSOC);
   }
 }
