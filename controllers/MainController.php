@@ -17,14 +17,24 @@ class MainController
   {
     $postObj = new Post();
 
+    // Pagination settings
     $paginate = [
       "current_page" => 1,
-      "page_limit" => 10,
+      "page_limit" => 5,
       "order_by" => '',
     ];
-    $posts = $postObj->findAll([], [], $paginate);
 
-    $res->render("home", ['posts' => $posts]);
+    // Get Posts with Pagination settings
+    $response = $postObj->findAll([], [], $paginate);
+
+    // Sending Data to views
+    $data = [
+      'posts' => $response['data'],
+      'pagination' => $response['pagination_info'],
+    ];
+
+    // Rendering home view
+    $res->render("home", $data);
   }
 
   public function contact(Request $req, Response $res)

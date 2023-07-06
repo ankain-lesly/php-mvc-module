@@ -9,8 +9,21 @@
     display: block;
   }
 </style>
-
 <div class="row">
+  <?php foreach ($posts as $post) { ?>
+    <div class="col-sm-3" style="margin: 8px">
+      <a href="_/blog/efasdf56561" class="well">
+        <h4><?= $post['title'] ?></h4>
+        <p><?= $post['category'] ?></p>
+        <small><?= $post['created_on'] ?></small>
+      </a>
+    </div>
+  <?php } ?>
+</div>
+
+
+<!-- 
+<div class="row" style="gap: 10px">
   <div class="col-sm-3">
     <a href="_/blog/efasdf56561" class="well">
       <h4>Users</h4>
@@ -35,4 +48,4 @@
       <p>30%</p>
     </a>
   </div>
-</div>
+</div> -->

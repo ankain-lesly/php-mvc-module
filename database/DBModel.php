@@ -209,7 +209,7 @@ abstract class DBModel extends BaseModel
     }
 
     $total_rows = $this->findCount()['count'];
-    $data['paginate_info'] = $pagination = [
+    $data['pagination_info'] = $pagination = [
       "current_page" => $pagination['current_page'] ?? 1,
       "total_pages" => round($total_rows / ($pagination['page_limit'] ?? 1)),
       "page_limit" => $pagination['page_limit'] ?? 0,
