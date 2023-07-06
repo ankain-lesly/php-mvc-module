@@ -149,21 +149,28 @@ abstract class DBModel extends BaseModel
   }
 
   // Find a Collection of objects
-  public function findAll($where = [], $select_array = null, array $paginate = [])
-  {
-    $paginate = [
-      "current_page" => 2,
-      "page_limit" => 3,
-      "order_by" => "id",
-    ];
+  public function findAll(
+    $where = [],
+    $select_array = null,
+    array $pagination = [
+      "current_page" => 1,
+      "page_limit" => 10,
+      "order_by" => '',
+    ]
+  ) {
+    // $pagination = [
+    //   "current_page" => 2,
+    //   "page_limit" => 3,
+    //   "order_by" => "id",
+    // ];
 
-    $paginate_sql = '';
+    $pagination_sql = '';
     $order_sql = '';
 
-    if (!empty($paginate)) {
-      $start_at = ($paginate['current_page'] - 1) * $paginate['page_limit'];
-      $paginate_sql = "LIMIT " . ($start_at) . ", " . $paginate['page_limit'];
-      $order_sql = !empty($paginate['order_by']) ? "ORDER BY " . $paginate['order_by'] . " DESC" : '';
+    if (!empty($pagination)) {
+      $start_at = ($pagination['current_page'] - 1) * $pagination['page_limit'];
+      $pagination_sql = "LIMIT " . ($start_at) . ", " . $pagination['page_limit'];
+      $order_sql = $pagination['order_by'] ? "ORDER BY " . $pagination['order_by'] . " DESC" : '';
     }
 
     $select_list = " * ";
@@ -184,7 +191,7 @@ abstract class DBModel extends BaseModel
 
     $sql_where = $sql_where ? "WHERE $sql_where" : '';
 
-    $sql = "SELECT $select_list FROM $tableName $sql_where $order_sql $paginate_sql";
+    $sql = "SELECT $select_list FROM $tableName $sql_where $order_sql $pagination_sql";
 
     $statement = $this->PDO->prepare($sql);
     foreach ($where as $key => $item) {
@@ -202,11 +209,11 @@ abstract class DBModel extends BaseModel
     }
 
     $total_rows = $this->findCount()['count'];
-    $data['paginate_info'] = $paginate = [
-      "current_page" => $paginate['current_page'] ?? 1,
-      "total_page" => round($total_rows / ($paginate['page_limit'] ?? 1)),
-      "page_limit" => $paginate['page_limit'] ?? 0,
-      "order_by" => $paginate['order_by'] ?? '',
+    $data['paginate_info'] = $pagination = [
+      "current_page" => $pagination['current_page'] ?? 1,
+      "total_pages" => round($total_rows / ($pagination['page_limit'] ?? 1)),
+      "page_limit" => $pagination['page_limit'] ?? 0,
+      "order_by" => $pagination['order_by'] ?? '',
       "total_rows" => $total_rows,
     ];
 

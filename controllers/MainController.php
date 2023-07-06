@@ -17,16 +17,13 @@ class MainController
   {
     $postObj = new Post();
 
-    $where = ['id' => 2];
-    $posts = $postObj->findAll();
-    // $DataAccess = (new Post())->DataAccess;
-    // $posts = $DataAccess->findAll("SELECT * FROM posts");
+    $paginate = [
+      "current_page" => 1,
+      "page_limit" => 10,
+      "order_by" => '',
+    ];
+    $posts = $postObj->findAll([], [], $paginate);
 
-    // echo '<pre>';
-    // var_dump($posts);
-    // echo '<br />';
-    // echo '</pre>';
-    // exit;
     $res->render("home", ['posts' => $posts]);
   }
 
