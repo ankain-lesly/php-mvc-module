@@ -155,10 +155,15 @@ class Router
     $uri = '/' . end($uri);
 
     $app_root = str_replace('\\', "/", self::$ROOT_DIR);
+    $server_root = str_replace('\\', "/", $server_root);
     $root = str_replace($server_root, '', $app_root);
 
-    $redirectTo = $root . $uri;
+    // $root = str_replace($server_root, '', self::$ROOT_DIR);
+    // $root = str_replace('\\', "/", $root);
 
+    echo $redirectTo = $root . $uri;
+
+    die;
     $this->response->redirect($redirectTo, 200);
   }
 

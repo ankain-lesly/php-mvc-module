@@ -206,7 +206,7 @@ abstract class DBModel extends BaseModel
     echo "<pre>";
     print_r($data);
     echo "</pre>";
-    exit;
+    // exit;
     return $data;
   }
   // Fetch Custom Query
