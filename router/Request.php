@@ -108,10 +108,9 @@ class Request
     $value = trim($value);
     return $value;
   }
-  /**
-   * Methods
-   * 
-   * isGet = 'get'
-   * isPost = 'post'
-   */
+
+  // private function headers(string $value) {
+
+  // }
+
 }
