@@ -71,6 +71,18 @@ class BaseModel
     return [];
   }
 
+  public function errorMessages()
+  {
+    return [
+      self::RULE_REQUIRED => 'This field is required',
+      self::RULE_EMAIL => 'This field must be valid email address',
+      self::RULE_MIN => 'Min length of this field must be {min}',
+      self::RULE_MAX => 'Max length of this field must be {max}',
+      self::RULE_MATCH => 'This field must be the same as {match}',
+      self::RULE_UNIQUE => 'Record with with this {field} already exists',
+    ];
+  }
+
   public function validate(array $update_data = [])
   {
     $update_attrs = array_keys($update_data);
@@ -118,18 +130,6 @@ class BaseModel
     return empty($this->errors);
   }
 
-  public function errorMessages()
-  {
-    return [
-      self::RULE_REQUIRED => 'This field is required',
-      self::RULE_EMAIL => 'This field must be valid email address',
-      self::RULE_MIN => 'Min length of this field must be {min}',
-      self::RULE_MAX => 'Max length of this field must be {max}',
-      self::RULE_MATCH => 'This field must be the same as {match}',
-      self::RULE_UNIQUE => 'Record with with this {field} already exists',
-    ];
-  }
-
   public function getErrorMessage($rule)
   {
     return $this->errorMessages()[$rule];
@@ -142,12 +142,19 @@ class BaseModel
     foreach ($params as $key => $value) {
       $errorMessage = str_replace("{{$key}}", $value, $errorMessage);
     }
-    $this->errors[$attribute][] = $errorMessage;
+
+    $this->errors[$attribute]['errors'][] = $errorMessage;
+    $this->errors[$attribute]['value'] = $this->{$attribute};
   }
 
   public function addError(string $attribute, string $message)
   {
-    $this->errors[$attribute][] = $message;
+    $this->errors[$attribute]['errors'][] = $message;
+    $this->errors[$attribute]['value'] = $this->{$attribute};
+  }
+  public function addErrorMessage(string $message)
+  {
+    $this->errors['message'] = $message;
   }
 
   // public function hasError($attribute)
@@ -157,7 +164,7 @@ class BaseModel
 
   public function getErrors()
   {
-    return $this->errors;
+    return $this->errors ? $this->errors : false;
   }
   // public function getFirstError($attribute)
   // {

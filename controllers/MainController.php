@@ -20,17 +20,17 @@ class MainController
     // Pagination settings
     $paginate = [
       "current_page" => 1,
-      "page_limit" => 5,
+      "page_limit" => 6,
       "order_by" => '',
     ];
 
     // Get Posts with Pagination settings
-    $response = $postObj->findAll([], [], $paginate);
+    $response = $postObj->findAll('', '', $paginate);
 
     // Sending Data to views
     $data = [
-      'posts' => $response['data'],
-      'pagination' => $response['pagination_info'],
+      'posts' => $response['data'] ?? [],
+      'pagination' => $response['pagination_info'] ?? [],
     ];
 
     // Rendering home view
@@ -53,31 +53,22 @@ class MainController
     if ($req->isPost()) {
       $post = new Post();
 
+      $post->loadData($req->body());
 
-      // $data = array(
-      //   'title' => 'Title updated', 
-      //   'category' => "Category updated",
-      //   'body' => "Body updated",
-      //   'id' => '3',
-      // );
-
-
-      $result = $post->save($req->body());
-      // $result = $post->update($data, ['id']);
-
-      // echo "<pre>";
-      // var_dump($result);
-      // echo "</pre>";
-
-      if (!empty($post->getErrors())) {
-        return $res->render("create-product", $result);
+      if ($post->validate() && $post->save()) {
+        echo 'Create successfully';
+        $res->render("home");
+        exit;
       }
-
-      // Redirect to another page
-      echo 'Create successfully';
-      // return $res->render("create-product", $result);
+      $errors =  ["errors" => $post->getErrors()];
+      echo '<pre>';
+      print_r($errors);
+      echo '<br />';
+      echo '</pre>';
+      exit;
+      $res->render("create-product", $errors);
     }
+
     $res->render("create-product");
-    // echo "Single Posts";
   }
 }

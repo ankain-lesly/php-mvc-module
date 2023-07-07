@@ -37,13 +37,13 @@ abstract class DBModel extends BaseModel
   // }
 
   // Insert Data
-  public function insert(array $data)
+  public function insert()
   {
-    $this->loadData($data);
+    // $this->loadData($data);
 
-    if (!$this->validate()) {
-      return ["errors" => $this->getErrors()];
-    }
+    // if (!$this->validate()) {
+    //   return ["errors" => $this->getErrors()];
+    // }
 
     $tableName = $this->tableName();
     $attributes = $this->attributes();
@@ -59,7 +59,7 @@ abstract class DBModel extends BaseModel
       $statement->bindValue(":$attribute", $this->{$attribute});
     }
 
-    return $statement->execute() ? $data : false;
+    return $statement->execute();
   }
 
   // Update Data
@@ -152,27 +152,29 @@ abstract class DBModel extends BaseModel
   public function findAll(
     $where = [],
     $select_array = null,
-    array $pagination = [
-      "current_page" => 1,
-      "page_limit" => 10,
-      "order_by" => '',
-    ]
+    array $pagination = []
   ) {
     // $pagination = [
-    //   "current_page" => 2,
-    //   "page_limit" => 3,
-    //   "order_by" => "id",
+    //   "current_page" => 1,
+    //   "page_limit" => 10,
+    //   "order_by_attr" => 'id',
     // ];
 
+    // Working with Pagination
     $pagination_sql = '';
     $order_sql = '';
 
     if (!empty($pagination)) {
-      $start_at = ($pagination['current_page'] - 1) * $pagination['page_limit'];
-      $pagination_sql = "LIMIT " . ($start_at) . ", " . $pagination['page_limit'];
-      $order_sql = $pagination['order_by'] ? "ORDER BY " . $pagination['order_by'] . " DESC" : '';
+      $current_page = $pagination['current_page'] ?? die("<b>'current_page'</b> is required for pagination to work in <b>" . get_class($this) . "</b> -> " . __FUNCTION__);
+      $page_limit = $pagination['page_limit'] ?? die("'page_limit' is required for pagination to work in <b>" . get_class($this) . "</b> -> " . __FUNCTION__);
+      $order_by = $pagination['order_by_attr'] ?? '';
+
+      $start_at = ($current_page - 1) * $page_limit;
+      $pagination_sql = "LIMIT " . ($start_at) . ", " . $page_limit;
+      $order_sql = $order_by ? "ORDER BY " . $order_by . " DESC" : '';
     }
 
+    // Select Custom attributes
     $select_list = " * ";
     if ($select_array && is_array($select_array)) {
       $select_list = implode(
@@ -181,7 +183,11 @@ abstract class DBModel extends BaseModel
       );
     }
 
+    // Getting Table name
     $tableName = static::tableName();
+
+    // Setting the where clause
+    if (!is_array($where)) $where = [];
     $attributes = array_keys($where);
 
     $sql_where = implode(
@@ -200,23 +206,23 @@ abstract class DBModel extends BaseModel
 
     $statement->execute();
 
-    // if ($statement->rowCount() <= 0) return [];
-
     $data = array();
 
     while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
       $data['data'][] = $row;
     }
 
-    $total_rows = $this->findCount()['count'];
-    $data['pagination_info'] = $pagination = [
-      "current_page" => $pagination['current_page'] ?? 1,
-      "total_pages" => round($total_rows / ($pagination['page_limit'] ?? 1)),
-      "page_limit" => $pagination['page_limit'] ?? 0,
-      "order_by" => $pagination['order_by'] ?? '',
-      "total_rows" => $total_rows,
-    ];
-
+    // Sending Pagination Data
+    if (!empty($pagination)) {
+      $total_rows = $this->findCount()['count'];
+      $data['pagination_info'] = $pagination = [
+        "current_page" => $current_page ?? 1,
+        "total_pages" => round($total_rows / ($page_limit ?? 1)),
+        "page_limit" => $page_limit ?? 0,
+        "order_by_attr" => $order_by ?? '',
+        "total_rows" => $total_rows,
+      ];
+    }
     return $data;
   }
   // Fetch Custom Query

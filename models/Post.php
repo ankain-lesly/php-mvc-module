@@ -30,10 +30,16 @@ class Post extends DBModel
         ];
     }
 
-    public function save(array $form_data)
+    public function save()
     {
-        // return parent::save($form_data);
-        return $this->insert($form_data);
+        // $this->loadData($form_data);
+
+        // if (!$this->validate()) {
+        //     return ["errors" => $this->getErrors()];
+        // }
+
+        // return parent::insert();
+        return $this->insert();
     }
 
     // public function getDisplayName(): string
