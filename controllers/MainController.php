@@ -51,21 +51,15 @@ class MainController
   public function createPost(Request $req, Response $res)
   {
     if ($req->isPost()) {
-      $post = new Post();
+      $PostObject = new Post();
+      $PostObject->loadData($req->body());
 
-      $post->loadData($req->body());
-
-      if ($post->validate() && $post->save()) {
-        echo 'Create successfully';
+      if ($PostObject->validate() && $PostObject->save()) {
+        // create an alert or notification here
         $res->render("home");
         exit;
       }
-      $errors =  $post->getErrors();
-      echo '<pre>';
-      print_r($errors);
-      echo '<br />';
-      echo '</pre>';
-      exit;
+      $errors =  $PostObject->getErrors();
       $res->render("create-product", $errors);
     }
 

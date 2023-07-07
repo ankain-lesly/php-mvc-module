@@ -145,7 +145,7 @@ class BaseModel
 
     $this->errors['errors'][$attribute]['errors'][] = $errorMessage;
     $this->errors['errors'][$attribute]['value'] = $this->{$attribute};
-    $this->addErrorMessage('Error validating data. Check Fields');
+    $this->addErrorMessage('Error, Please check fields and try again');
   }
 
   public function addError(string $attribute, string $message)

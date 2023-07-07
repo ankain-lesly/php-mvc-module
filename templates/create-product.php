@@ -12,11 +12,12 @@
 
 <?php
 $errors = $errors ?? false;
+$message = $message ?? false;
 if ($errors) {
   $key = array_keys($errors)[0];
 ?>
   <div class="alert alert-danger" role="alert">
 
-    <?= $key . ': ' . $errors[$key][0] ?>
+    <?= $message ?>
   </div>
 <?php } ?>
