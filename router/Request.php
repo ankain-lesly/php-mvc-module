@@ -83,6 +83,15 @@ class Request
   }
   public function body(string $param_key = null)
   {
+    // Converts Raw Data into a PHP object
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if ($data) {
+      foreach ($data as $key => $value) {
+        $this->body[$key] = $this->sanitizeParams($value);
+      }
+    }
+
     if ($this->isGet()) {
       foreach ($_GET as $key => $value) {
         $this->body[$key] = $this->sanitizeParams($value);
