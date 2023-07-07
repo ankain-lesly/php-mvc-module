@@ -59,7 +59,7 @@ abstract class DBModel extends BaseModel
       $statement->bindValue(":$attribute", $this->{$attribute});
     }
 
-    return $statement->execute();
+    return $statement->execute() ?? $this->addErrorMessage('Error Dreating Data!');
   }
 
   // Update Data
@@ -97,7 +97,8 @@ abstract class DBModel extends BaseModel
     foreach ($final_attributes as $attribute) {
       $statement->bindValue(":$attribute", $this->{$attribute});
     }
-    return $statement->execute() ? $data : false;
+
+    return $statement->execute() ?? $this->addErrorMessage('Error Dreating Data!');
   }
   // Delete Data
   public function delete($where)

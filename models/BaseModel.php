@@ -143,18 +143,20 @@ class BaseModel
       $errorMessage = str_replace("{{$key}}", $value, $errorMessage);
     }
 
-    $this->errors[$attribute]['errors'][] = $errorMessage;
-    $this->errors[$attribute]['value'] = $this->{$attribute};
+    $this->errors['errors'][$attribute]['errors'][] = $errorMessage;
+    $this->errors['errors'][$attribute]['value'] = $this->{$attribute};
+    $this->addErrorMessage('Error validating data. Check Fields');
   }
 
   public function addError(string $attribute, string $message)
   {
-    $this->errors[$attribute]['errors'][] = $message;
-    $this->errors[$attribute]['value'] = $this->{$attribute};
+    $this->errors['errors'][$attribute]['errors'][] = $message;
+    $this->errors['errors'][$attribute]['value'] = $this->{$attribute};
   }
   public function addErrorMessage(string $message)
   {
     $this->errors['message'] = $message;
+    return false;
   }
 
   // public function hasError($attribute)

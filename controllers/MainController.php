@@ -60,7 +60,7 @@ class MainController
         $res->render("home");
         exit;
       }
-      $errors =  ["errors" => $post->getErrors()];
+      $errors =  $post->getErrors();
       echo '<pre>';
       print_r($errors);
       echo '<br />';
